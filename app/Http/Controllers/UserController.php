@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -16,9 +16,11 @@ class UserController extends Controller
      */
     public function index(): JsonResponse
     {
+//        $users = User::query()->get();
+        $users = User::query()->get();
         return new JsonResponse(
             [
-                'data' => "aaa"
+                'data' => $users
             ]
         );
     }
@@ -26,12 +28,21 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store( Request $request ): JsonResponse
+    public function store( Request $request )
     {
-        return new JsonResponse([
-                'data' => "Saved"
-            ]
-        );
+        $created = User::query()->create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password,
+        ]);
+        $created->users()->sync($request->user_ids);
+
+            return new JsonResponse([
+                    'data' => $created
+                ]
+            );
+
+
     }
 
     /**
@@ -41,7 +52,7 @@ class UserController extends Controller
     {
         return new JsonResponse(
             [
-                'data' => "Users"
+                'data' => $user
             ]
         );
     }
@@ -52,7 +63,7 @@ class UserController extends Controller
     public function update(Request $request, User $user): JsonResponse
     {
         return new JsonResponse([
-                'data' => "Updated"
+                'data' => $user
             ]
         );
     }
@@ -63,7 +74,7 @@ class UserController extends Controller
     public function destroy(User $user): JsonResponse
     {
         return new JsonResponse([
-                'data' => "Removed"
+                'data' => $user
             ]
         );
     }
